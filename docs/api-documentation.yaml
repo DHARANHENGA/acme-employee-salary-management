@@ -61,7 +61,7 @@ paths:
         - name: search
           in: query
           required: false
-          description: Search by employee ID or employee name
+          description: Search by employee name
           schema:
             type: string
             example: Arun
@@ -215,7 +215,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OperationResponse'
+                $ref: '#/components/responses/EmployeeDeactivatedResponse'
 
         '404':
           $ref: '#/components/responses/EmployeeNotFound'
@@ -1115,6 +1115,14 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/NotFoundResponse'
+
+
+    EmployeeDeactivatedResponse:
+      description: Employee deactivated successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OperationResponse'
 
 
     InternalServerError:

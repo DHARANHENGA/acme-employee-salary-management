@@ -141,3 +141,9 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Prisma compiled seed files
+acme-employee-salary-management-backend/prisma/*.js
+acme-employee-salary-management-backend/prisma/*.js.map
+acme-employee-salary-management-backend/prisma/*.d.ts
+acme-employee-salary-management-backend/prisma/*.d.ts.map
