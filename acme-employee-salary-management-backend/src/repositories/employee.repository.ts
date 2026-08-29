@@ -17,6 +17,10 @@ export class EmployeeRepository {
       departmentId,
       countryId,
       status,
+      joinedFrom,
+      joinedTo,
+      sortBy = 'employeeId',
+      sortOrder = 'asc',
     } = filters;
 
     const where = {
@@ -26,7 +30,21 @@ export class EmployeeRepository {
       ...(departmentId && { departmentId }),
       ...(countryId && { countryId }),
       ...(status && { status }),
+      ...((joinedFrom || joinedTo) && {
+        dateJoined: {
+          ...(joinedFrom && { gte: new Date(joinedFrom) }),
+          ...(joinedTo && { lte: new Date(`${joinedTo}T23:59:59.999Z`) }),
+        },
+      }),
     };
+
+    const sortFieldMap: Record<string, string> = {
+      employeeId: 'employeeId',
+      name: 'name',
+      dateJoined: 'dateJoined',
+      salary: 'baseSalary',
+    };
+    const orderByField = sortFieldMap[sortBy] ?? 'employeeId';
 
     try {
       const [rows, total] = await Promise.all([
@@ -39,7 +57,7 @@ export class EmployeeRepository {
             country: { select: { name: true } },
             currency: { select: { code: true } },
           },
-          orderBy: { employeeId: 'asc' },
+          orderBy: { [orderByField]: sortOrder },
         }),
         prisma.employee.count({ where }),
       ]);
@@ -139,6 +157,7 @@ export class EmployeeRepository {
           currencyId,
           dateJoined: new Date(input.dateJoined),
           baseSalary: input.salary,
+          ...(input.status && { status: input.status }),
         },
       });
     } catch (err) {

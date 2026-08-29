@@ -158,6 +158,38 @@ describe('EmployeeQuerySchema', () => {
     const result = EmployeeQuerySchema.parse({ search: '  Engineering  ' });
     expect(result.search).toBe('Engineering');
   });
+
+  it('accepts valid sortBy and sortOrder options', () => {
+    const parsed = EmployeeQuerySchema.parse({ sortBy: 'salary', sortOrder: 'desc' });
+    expect(parsed.sortBy).toBe('salary');
+    expect(parsed.sortOrder).toBe('desc');
+  });
+
+  it('accepts valid joinedFrom and joinedTo date range', () => {
+    const result = EmployeeQuerySchema.safeParse({
+      joinedFrom: '2024-01-01',
+      joinedTo: '2026-08-29',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts single-ended joinedFrom or joinedTo', () => {
+    expect(EmployeeQuerySchema.safeParse({ joinedFrom: '2024-01-01' }).success).toBe(true);
+    expect(EmployeeQuerySchema.safeParse({ joinedTo: '2026-08-29' }).success).toBe(true);
+  });
+
+  it('rejects when joinedFrom is greater than joinedTo', () => {
+    const result = EmployeeQuerySchema.safeParse({
+      joinedFrom: '2026-08-29',
+      joinedTo: '2024-01-01',
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const issue = result.error.issues[0];
+      expect(issue?.message).toBe('joinedTo must be greater than or equal to joinedFrom');
+      expect(issue?.path).toContain('joinedTo');
+    }
+  });
 });
 
 // ─── AnalyticsQuerySchema ─────────────────────────────────────

@@ -35,6 +35,7 @@ export interface UpdateEmployeeInput {
   countryId: number;
   dateJoined: string;
   salary: number;
+  status?: EmployeeStatus;
 }
 
 export interface EmployeeFilters {
@@ -44,4 +45,8 @@ export interface EmployeeFilters {
   departmentId?: number;
   countryId?: number;
   status?: EmployeeStatus;
+  joinedFrom?: string;
+  joinedTo?: string;
+  sortBy?: 'employeeId' | 'name' | 'dateJoined' | 'salary';
+  sortOrder?: 'asc' | 'desc';
 }

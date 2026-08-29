@@ -17,20 +17,38 @@ export const UpdateEmployeeSchema = z.object({
   countryId: z.number().int().positive(),
   dateJoined: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD'),
   salary: z.number().min(0),
-});
-
-export const EmployeeQuerySchema = z.object({
-  page: z.coerce.number().int().min(1).default(PAGINATION.DEFAULT_PAGE),
-  limit: z.coerce.number().int().min(1).max(PAGINATION.MAX_LIMIT).default(PAGINATION.DEFAULT_LIMIT),
-  search: z
-    .string()
-    .trim()
-    .min(1, 'Search term cannot be empty or whitespace only')
-    .optional(),
-  departmentId: z.coerce.number().int().positive().optional(),
-  countryId: z.coerce.number().int().positive().optional(),
   status: z.enum([EMPLOYEE_STATUS.ACTIVE, EMPLOYEE_STATUS.INACTIVE]).optional(),
 });
+
+export const EmployeeQuerySchema = z
+  .object({
+    page: z.coerce.number().int().min(1).default(PAGINATION.DEFAULT_PAGE),
+    limit: z.coerce.number().int().min(1).max(PAGINATION.MAX_LIMIT).default(PAGINATION.DEFAULT_LIMIT),
+    search: z
+      .string()
+      .trim()
+      .min(1, 'Search term cannot be empty or whitespace only')
+      .optional(),
+    departmentId: z.coerce.number().int().positive().optional(),
+    countryId: z.coerce.number().int().positive().optional(),
+    status: z.enum([EMPLOYEE_STATUS.ACTIVE, EMPLOYEE_STATUS.INACTIVE]).optional(),
+    joinedFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD').optional(),
+    joinedTo: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD').optional(),
+    sortBy: z.enum(['employeeId', 'name', 'dateJoined', 'salary']).default('employeeId'),
+    sortOrder: z.enum(['asc', 'desc']).default('asc'),
+  })
+  .refine(
+    (data) => {
+      if (data.joinedFrom && data.joinedTo) {
+        return new Date(data.joinedFrom) <= new Date(data.joinedTo);
+      }
+      return true;
+    },
+    {
+      message: 'joinedTo must be greater than or equal to joinedFrom',
+      path: ['joinedTo'],
+    }
+  );
 
 export const AnalyticsQuerySchema = z.object({
   countryId: z.coerce.number().int().positive().optional(),

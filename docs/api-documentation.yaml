@@ -32,12 +32,21 @@ paths:
       summary: Get employees
       description: |
         Returns a paginated list of employees.
+
         Supports:
         - Search by employee ID or name
         - Filtering by department
         - Filtering by country
         - Filtering by status
+        - Filtering by joining date range
+        - Sorting
         - Pagination
+
+        Joining date filtering rules:
+        - joinedFrom must be less than or equal to joinedTo.
+        - joinedFrom can be provided without joinedTo.
+        - joinedTo can be provided without joinedFrom.
+        - All filtering, sorting and pagination operations are performed by the backend.
       parameters:
         - name: page
           in: query
@@ -88,6 +97,50 @@ paths:
           description: Filter by employee status
           schema:
             $ref: '#/components/schemas/EmployeeStatus'
+
+        - name: joinedFrom
+          in: query
+          required: false
+          description: Filter employees who joined on or after this date
+          schema:
+            type: string
+            format: date
+          example: '2024-01-01'
+
+        - name: joinedTo
+          in: query
+          required: false
+          description: Filter employees who joined on or before this date
+          schema:
+            type: string
+            format: date
+          example: '2026-08-29'
+
+        - name: sortBy
+          in: query
+          required: false
+          description: Field used to sort employees
+          schema:
+            type: string
+            enum:
+              - employeeId
+              - name
+              - dateJoined
+              - salary
+            default: employeeId
+          example: name
+
+        - name: sortOrder
+          in: query
+          required: false
+          description: Sort direction
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: asc
+          example: asc
 
       responses:
         '200':
