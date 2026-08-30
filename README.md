@@ -116,5 +116,6 @@ Full system documentation is available in the [`docs/`](./docs) directory:
 - 🏗️ [**System Architecture & Deployment**](docs/architecture.md)
 - 🎨 [**Frontend Design & Functionality**](docs/frontend-functionality.md)
 - ⚖️ [**Technical Decisions & Trade-offs**](docs/technical-decisions-trade-offs.md)
+- 🤖 [**AI Prompting & Performance Considerations**](docs/ai-prompts-and-instructions.md)
 - 🔌 [**OpenAPI Specification**](docs/api-documentation.yaml)
 - 📐 [**Database ER Diagram**](docs/er-diagram.md)
