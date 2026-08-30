@@ -248,3 +248,38 @@ Employees are not physically deleted. The employee status is changed to `INACTIV
 ### Error Logging
 
 A persistent error-log table is not included in the MVP. Unexpected application errors are handled through centralized error handling and application logging.
+
+---
+
+## 10. Deployment & Cloud Production Architecture
+
+The application is deployed across multi-region serverless cloud infrastructure for remote evaluation:
+
+```mermaid
+flowchart TD
+    User["HR Manager / Evaluator Browser"]
+
+    subgraph CDN["Vercel Global Edge Network (Frontend)"]
+        FE["React + Vite Single Page App<br/>(vercel.json rewrites)"]
+    end
+
+    subgraph Render["Render Cloud Web Service (Backend)"]
+        BE["Node.js + Express REST API Server<br/>(render.yaml)"]
+    end
+
+    subgraph Neon["Neon Serverless PostgreSQL (Database)"]
+        DB[("PostgreSQL Cloud DB<br/>(10,000 Seeded Employees)")]
+    end
+
+    User -->|HTTPS| FE
+    FE -->|REST API over HTTPS| BE
+    BE -->|SSL Connection / Prisma ORM| DB
+```
+
+### Infrastructure Summary
+
+| Layer | Provider | Deployment Details | Configuration File |
+|---|---|---|---|
+| **Frontend UI** | **Vercel** | Vite SPA deployed to global edge CDN with production environment variable injection (`VITE_API_BASE_URL`). | [`vercel.json`](file:///c:/Users/tenis/OneDrive/Desktop/acme/acme-employee-salary-management/acme-employee-salary-management-frontend/vercel.json) |
+| **Backend REST API** | **Render** | Node.js + Express REST API Web Service compiled from TypeScript source. | [`render.yaml`](file:///c:/Users/tenis/OneDrive/Desktop/acme/acme-employee-salary-management/render.yaml) |
+| **Database** | **Neon PostgreSQL** | Serverless PostgreSQL DB with connection pooling and 10,000 seeded employee records. | [`schema.prisma`](file:///c:/Users/tenis/OneDrive/Desktop/acme/acme-employee-salary-management/acme-employee-salary-management-backend/prisma/schema.prisma) |
