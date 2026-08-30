@@ -10,7 +10,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": [
-        "src/*"
+        "./src/*"
       ]
     },
     "strict": true,
@@ -23,8 +23,7 @@
     "sourceMap": true
   },
   "include": [
-    "src/**/*",
-    "src/config/env.ts"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",
