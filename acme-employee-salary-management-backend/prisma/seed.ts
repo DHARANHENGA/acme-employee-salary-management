@@ -108,16 +108,24 @@ async function main() {
 
   // Check if employees already exist
   const existing = await prisma.employee.count();
-  if (existing > 0) {
+  if (existing >= 10_000) {
     console.log(`Employees already seeded (${existing} records). Skipping.`);
     return;
   }
 
-  console.log('Seeding 10,000 employees…');
+  console.log(`Seeding remaining ${10_000 - existing} employees using bulk insert…`);
+
+  // Pre-fetch reference maps to eliminate network queries
+  const countriesList = await prisma.country.findMany();
+  const departmentsList = await prisma.department.findMany();
+
+  const countryMap = new Map(countriesList.map((c) => [c.code, c]));
+  const deptMap = new Map(departmentsList.map((d) => [d.name, d]));
 
   const countryCodes = ['IN', 'US', 'GB', 'DE', 'BR', 'SG'];
+  const employeeRecords = [];
 
-  for (let i = 1; i <= 10_000; i++) {
+  for (let i = existing + 1; i <= 10_000; i++) {
     const countryCode = countryCodes[(i - 1) % 6]!;
     const deptName = DEPARTMENTS[(i - 1) % 6]!;
     const titleIdx = (i - 1) % 3;
@@ -126,33 +134,36 @@ async function main() {
     const lastName  = LAST_NAMES[Math.floor((i - 1) / FIRST_NAMES.length) % LAST_NAMES.length]!;
     const name = `${firstName} ${lastName}`;
 
-    const country = await prisma.country.findUniqueOrThrow({ where: { code: countryCode } });
-    const dept    = await prisma.department.findUniqueOrThrow({ where: { name: deptName } });
+    const country = countryMap.get(countryCode)!;
+    const dept    = deptMap.get(deptName)!;
 
     const range = SALARY_RANGES[countryCode]!;
     const salary = randomBetween(range.min, range.max);
     const status = i % 10 === 0 ? 'INACTIVE' : 'ACTIVE';
 
-    // Spread join dates across 2010–2024
     const startMs = new Date('2010-01-01').getTime();
     const endMs   = new Date('2024-12-31').getTime();
     const dateJoined = new Date(startMs + ((i / 10_000) * (endMs - startMs)));
 
-    await prisma.employee.create({
-      data: {
-        employeeId:   formatEmployeeId(i),
-        name,
-        departmentId: dept.id,
-        jobTitle:     JOB_TITLES[deptName]![titleIdx]!,
-        countryId:    country.id,
-        currencyId:   country.currencyId,
-        dateJoined,
-        baseSalary:   salary,
-        status,
-      },
+    employeeRecords.push({
+      employeeId:   formatEmployeeId(i),
+      name,
+      departmentId: dept.id,
+      jobTitle:     JOB_TITLES[deptName]![titleIdx]!,
+      countryId:    country.id,
+      currencyId:   country.currencyId,
+      dateJoined,
+      baseSalary:   salary,
+      status,
     });
+  }
 
-    if (i % 1000 === 0) console.log(`  ${i} / 10,000 inserted`);
+  // Insert bulk chunks for lightning speed
+  const chunkSize = 2000;
+  for (let i = 0; i < employeeRecords.length; i += chunkSize) {
+    const chunk = employeeRecords.slice(i, i + chunkSize);
+    await prisma.employee.createMany({ data: chunk });
+    console.log(`  ${existing + Math.min(i + chunkSize, employeeRecords.length)} / 10,000 inserted`);
   }
 
   console.log('Seeding complete.');

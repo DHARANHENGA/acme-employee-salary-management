@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: acme-salary-backend
+    env: node
+    rootDir: acme-employee-salary-management-backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false

@@ -5,7 +5,8 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev -r tsconfig-paths/register --respawn src/server.ts",
-    "build": "tsc && tsc-alias",
+    "build": "prisma generate && tsc && tsc-alias",
+    "postinstall": "prisma generate",
     "start": "node dist/server.js",
     "test": "vitest --run",
     "test:watch": "vitest",
